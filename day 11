@@ -1,0 +1,12 @@
+#control staements --> there are the stateements which control the flow of the execution of the program
+#conditional statement if else elif
+#repetative statemnets loops for and while loop
+#jumping statements -break,pass,continue, assert
+''' if condition:'''
+#validate
+students=['akash','sathwik']
+name=input("enter the name:").lower()
+if name in student:
+    print("student is present")
+else:
+    print("thestudent is not there in the data given")
