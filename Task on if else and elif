@@ -1,0 +1,51 @@
+#GRADE CHECKER
+marks=int(input("enter marks:"))
+if marks>=90:
+    print( 'Grade:A')
+    print("Outstanding")
+elif marks>=80 and marks<90:
+    print('Grade:B')
+    print("Excellent")
+elif marks>=70 and marks<80:
+    print('Grade:C')
+    print("Good")
+elif marks>=60 and marks<70:
+    print('Grade:D')
+    print("Fair,needs to improve")
+elif marks>=50 and marks<60:
+    print('Grade:E')
+    print("Poor,needs serious improvement")
+else:
+    print('Grade:Fail')
+    print("Failed needs to repair")
+
+#EVEN-ODD CHECKER 
+x=int(input("enter a number:"))
+
+if x==0:
+    print("Zero is neither even nor odd")
+elif x<0 and x%2==0:
+    print("Negative even number")
+elif x<0 and x%2!=0:
+    print("Negative odd number")
+elif x%2==0 and x>0:
+    print("Even number")
+else :
+    print("Odd number")
+
+#Season identifier
+winter=[12,1,2]
+spring=[3,4,5]
+summer=[6,7,8]
+autumn=[9,10,11]
+c=int(input("enter month number"))
+if c in winter:
+    print("season: summer")
+elif c in spring:
+    print("season:spring")
+elif c in summer:
+    print("season:summer")
+elif c in autumn:
+    print("season:Autumn")
+else:
+    print("Invalid month entered")
