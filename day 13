@@ -1,0 +1,105 @@
+'''#tokens,data types,operators,conditional statements ,input and output,type conversions,control blocks,repetation statements for while jumping statements
+age=[23,21,43]
+print(type(age))
+print(age)
+#dict will be converted to the list by using the from keys 
+age=[23,21,43]
+x=dict.fromkeys(age)
+print(x)
+x[43]="hi"
+print(x)
+
+
+name="codegnan"
+x=name.split()
+y=list(name)
+v=dict.fromkeys(name)
+print(x,y,v)
+#input formatting list input,tuple input and dict values
+x=eval(input("enter the inpiut"))
+print(x)
+#eval() is used in global and local and used to make it even more clear and effectiev to take inputs for the list tuple dict etc
+v=eval(input("enetr"))
+print(v)
+'''
+#we can handle any type of inputs and access them using eval
+#repetation statements(loops) for while
+#loops will automate the task
+#for loop is used to iterate an item in the sequences and also generate a sequence of numbers there we will use the range
+'''
+for <loop varaible> in collection or function :
+statememnts or conditions
+'''
+
+data = [24, 25, 21, 20]
+x = 0  # Initializing x fixes the error
+
+for i in range(len(data) - 1):
+    x = x + data[i]
+print(x)
+print(x/len(data))
+
+
+x = 0
+y = [1, 3, 4.5, 'codegnan', 3, 'agents', 2.4]
+
+for i in y:
+    if type(i) in (int,float):
+        x = x + i  # Removed the colon from the end of this line
+
+print(x)
+
+
+x = 0
+y = [1, 3, 4.5, 'codegnan', 3, 'agents', 2.4]
+
+for i in y:
+    if isinstance(i, (int, float)):
+        x = x + i  
+
+print(x)
+
+details={'names':['sai','abhi','ram'],'marks':[24,20,28]}
+for i,j in details.items():
+    print(i,j,sep=":")
+
+#range(start,stop,step)
+for i in range(5):
+    print(i)
+#wemenction start and end
+'''for i in range(1,11):
+    print(i,end=" ")
+'''
+#rangeof start,end,step
+for i in range(1,11,2):
+    print(i)
+for i in range(10,-1,-2):
+    print(i,end=" ")
+#home task given below
+
+work_log = [1, 1, 1, 0, 1, 1, 0]
+longest_streak = 0
+current_streak = 0
+
+for i in work_log:
+    if i == 1:
+        current_streak += 1
+        if current_streak > longest_streak:
+            longest_streak = current_streak
+    else:
+        
+        current_streak = 0
+
+print(longest_streak)
+
+        
+
+    
+
+
+    
+
+
+
+    
+    
