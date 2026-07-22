@@ -1,0 +1,71 @@
+# task of printing the A B C D E F G H USING CHAR AND ORD WE WILL GET THE VALUE AND CHAR WILL GIVE THE ALPHABET OF THAT ASCII VALUE
+print(ord('A'))
+print(chr(65))
+#using these two we have used for loop the ord will always return ascii value so we need that ascii value converetd to char so i used chr
+#and range is from A to 8 elemenets
+#i have given start and stop 
+for i in range(ord('A'), ord('A') + 8):
+    print(chr(i), end=" ")
+print()
+
+#similarly i need only H F D B so i used -2 
+for i in range(ord('H'), ord('A') - 1, -2):
+    print(chr(i), end=" ")
+print()  
+
+#while use case and how we have used the while what is the difference between the for and the while
+#checks until the condition is true
+'''syntax
+while conditon
+statements ....
+...
+'''
+count=0
+while count<5:
+    print("okay you have access")
+    a=[]
+    a.append("codegnana")
+    print(a)
+    count=count+1
+    #addition assignment operator
+# to find the valid password
+password=input("enter the password:")
+search=input("enter the item:")
+store=["mobile",'laptop','powerbank','charger']
+correct_password = "python123"
+
+while True:
+    password = input("Enter Password: ")
+
+    if password == correct_password:
+        print("Login Successful")
+        break
+    else:
+        print("Wrong Password! Try Again.")
+
+correct_pin = 1234
+
+while True:
+    pin = int(input("Enter ATM PIN: "))
+
+    if pin == correct_pin:
+        print("Access Granted")
+        break
+
+    print("Invalid PIN")
+
+i = 0
+
+while i < 10:
+    i += 1
+
+    if i % 2 == 0:
+        continue
+
+    print(i)
+
+
+    
+
+    
+
