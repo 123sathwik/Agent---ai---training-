@@ -1,0 +1,191 @@
+# ATM Banking System
+
+card_inserted = False
+correct_pin = "1234"
+balance = 50000
+otp = "567890"
+
+transactions = [
+    "Deposited ₹10000",
+    "Withdrawn ₹2000",
+    "Online Shopping ₹1500"
+]
+
+
+while not card_inserted:
+    card = input("Insert ATM Card (yes/no): ")
+
+    if card.lower() == "yes":
+        print("Card Inserted Successfully.\n")
+        card_inserted = True
+    else:
+        print("Invalid Card! Please Insert Again.\n")
+
+
+while True:
+    print("\nSelect Language")
+    print("1. English")
+    print("2. Telugu")
+    print("3. Hindi")
+
+    language = input("Enter Choice: ")
+
+    if language == "1":
+        print("English Selected")
+        break
+
+    elif language == "2":
+        print("Telugu Selected")
+        break
+
+    elif language == "3":
+        print("Hindi Selected")
+        break
+
+    else:
+        print("Invalid Choice")
+
+
+attempt = 0
+
+while attempt < 3:
+    pin = input("\nEnter 4-Digit PIN: ")
+
+    if pin == correct_pin:
+        print("PIN Verified Successfully")
+        break
+
+    else:
+        attempt += 1
+        print("Wrong PIN")
+
+if attempt == 3:
+    print("Card Blocked")
+    exit()
+
+
+
+while True:
+
+    print("\n========== ATM MENU ==========")
+    print("1. Withdraw")
+    print("2. Balance Enquiry")
+    print("3. Mini Statement")
+    print("4. Change PIN")
+    print("5. Exit")
+
+    choice = input("Enter Your Choice: ")
+
+ 
+
+    if choice == "1":
+
+        print("\nSelect Account")
+        print("1. Savings Account")
+        print("2. Current Account")
+
+        account = input("Choose Account: ")
+
+        if account == "1":
+            print("Savings Account Selected")
+
+        elif account == "2":
+            print("Current Account Selected")
+
+        else:
+            print("Invalid Account")
+            continue
+
+        amount = int(input("Enter Amount: "))
+
+        if amount <= balance:
+
+            balance = balance - amount
+
+            print("\nPlease Collect Your Cash")
+            print("Transaction Successful")
+
+            print("Remaining Balance =", balance)
+
+            transactions.append(f"Withdrawn ₹{amount}")
+
+        else:
+
+            print("Insufficient Balance")
+
+
+
+    elif choice == "2":
+
+        print("\nCurrent Balance = ₹", balance)
+
+
+
+    elif choice == "3":
+
+        print("\n------ Last Transactions ------")
+
+        for transaction in transactions:
+            print(transaction)
+
+        print("Available Balance =", balance)
+
+
+    elif choice == "4":
+
+        mobile = input("Enter Registered Mobile Number: ")
+
+        print("OTP Sent Successfully")
+
+        entered_otp = input("Enter OTP: ")
+
+        if entered_otp == otp:
+
+            new_pin = input("Enter New PIN: ")
+
+            confirm_pin = input("Confirm New PIN: ")
+
+            if new_pin == confirm_pin:
+
+                correct_pin = new_pin
+
+                print("PIN Changed Successfully")
+
+            else:
+
+                print("PIN Does Not Match")
+
+        else:
+
+            print("Invalid OTP")
+
+
+
+    elif choice == "5":
+
+        print("\nThank You for Using Our ATM")
+        print("Please Collect Your Card")
+        break
+
+
+    else:
+
+        print("Invalid Choice")
+
+
+
+
+
+
+
+
+
+
+
+        
+
+    
+
+
+    
+
