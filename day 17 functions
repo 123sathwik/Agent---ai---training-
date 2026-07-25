@@ -1,0 +1,31 @@
+#pop-procedure oriented programming
+#function-a function is a block of code(statements) which performs a specific tasks 
+#it is a resuable code- redability reusability and easy to maintain
+#user defined function def 
+#build in functions - python by default 
+#anonymous functions --lambda(map,filter,reduce)
+#recursive function @ decorators
+''' def funname(parameters):
+      ''doc string is used to description of the function
+       statements"""" 
+       return values(s)
+    fname(arguments)       
+       '''
+def add(a,b):
+    """ sample add functions"""
+    return a+b
+x=add(1,2)
+print(x)
+print(add.__doc__)
+#parametes - below category
+#positions arguments -- count of argumnets should be matched 
+#default arguments -- we can make argumnets as default
+#keyword arguments-- name of the argumnets to be matched 
+#variable length args --- (*args)--we can pass any number of the positional arguments
+#keyword variables lenght arguments (**kwargs)--we can pass any number of keyword argumnets 
+#non default always follow default
+# #type error as count is mismatched 
+#type error keyword item is mismatching
+
+
+
