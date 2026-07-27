@@ -1,0 +1,209 @@
+from datetime import datetime
+
+users = {}
+
+print("=" * 60)
+print("        BMI HEALTH TRACKER")
+print("=" * 60)
+
+while True:
+    try:
+        total_users = int(input("Enter Number of Users: "))
+        if total_users > 0:
+            break
+        print("Enter a value greater than 0.")
+    except ValueError:
+        print("Enter numbers only.")
+
+for i in range(total_users):
+
+    print("\n" + "=" * 60)
+    print(f"USER {i+1}")
+    print("=" * 60)
+
+    name = input("Enter Name: ").title()
+
+    while True:
+        try:
+            age = int(input("Enter Age: "))
+            if age > 0:
+                break
+            print("Age must be positive.")
+        except ValueError:
+            print("Enter numbers only.")
+
+    gender = input("Enter Gender (Male/Female): ").title()
+
+    while True:
+        print("\nSelect Height Unit")
+        print("1. Centimeters(cm)")
+        print("2. Meters(m)")
+        print("3. Feet(ft)")
+        print("4. Inches(in)")
+        unit = input("Choice: ")
+
+        try:
+
+            if unit == "1":
+                height_cm = float(input("Enter Height (cm): "))
+
+            elif unit == "2":
+                height_cm = float(input("Enter Height (m): ")) * 100
+
+            elif unit == "3":
+                height_cm = float(input("Enter Height (ft): ")) * 30.48
+
+            elif unit == "4":
+                height_cm = float(input("Enter Height (in): ")) * 2.54
+
+            else:
+                print("Invalid Choice")
+                continue
+
+            if height_cm <= 0:
+                print("Height must be greater than 0.")
+                continue
+
+            break
+
+        except ValueError:
+            print("Enter valid numbers.")
+
+    while True:
+        try:
+            weight = float(input("Enter Weight (kg): "))
+            if weight <= 0:
+                print("Weight must be greater than 0.")
+                continue
+            break
+        except ValueError:
+            print("Enter valid numbers.")
+
+    height_m = height_cm / 100
+    bmi = round(weight / (height_m ** 2), 2)
+
+    if bmi < 18.5:
+        status = "Underweight"
+        diet = [
+            "Milk",
+            "Eggs",
+            "Banana",
+            "Rice",
+            "Chicken",
+            "Dry Fruits",
+            "Paneer"
+        ]
+        water = "3 Liters"
+        exercise = "Strength Training"
+        days = 90
+
+    elif bmi < 25:
+        status = "Normal Weight"
+        diet = [
+            "Vegetables",
+            "Fruits",
+            "Whole Grains",
+            "Eggs",
+            "Chicken",
+            "Fish"
+        ]
+        water = "3 Liters"
+        exercise = "Walking + Cardio"
+        days = 30
+
+    elif bmi < 30:
+        status = "Overweight"
+        diet = [
+            "Salads",
+            "Oats",
+            "Brown Rice",
+            "Grilled Chicken",
+            "Green Tea"
+        ]
+        water = "4 Liters"
+        exercise = "45 Minutes Walking"
+        days = 120
+
+    else:
+        status = "Obesity"
+        diet = [
+            "Vegetables",
+            "Sprouts",
+            "Oats",
+            "Soup",
+            "Lean Protein",
+            "No Sugar"
+        ]
+        water = "4-5 Liters"
+        exercise = "60 Minutes Walking"
+        days = 180
+
+    ideal_low = round(18.5 * (height_m ** 2), 1)
+    ideal_high = round(24.9 * (height_m ** 2), 1)
+
+    users[name] = {
+        "Age": age,
+        "Gender": gender,
+        "Height(cm)": round(height_cm, 2),
+        "Weight(kg)": weight,
+        "BMI": bmi,
+        "Status": status,
+        "Ideal Weight": f"{ideal_low} - {ideal_high} kg",
+        "Diet": diet,
+        "Water": water,
+        "Exercise": exercise,
+        "Review": f"Every 7 Days",
+        "Target Days": days,
+        "Date": datetime.now().strftime("%d-%m-%Y")
+    }
+
+print("\n")
+print("=" * 80)
+print("                  BMI HEALTH REPORT")
+print("=" * 80)
+
+for name, data in users.items():
+
+    print("\n" + "-" * 70)
+    print(f"Name             : {name}")
+    print(f"Age              : {data['Age']}")
+    print(f"Gender           : {data['Gender']}")
+    print(f"Height           : {data['Height(cm)']} cm")
+    print(f"Weight           : {data['Weight(kg)']} kg")
+    print(f"BMI              : {data['BMI']}")
+    print(f"Category         : {data['Status']}")
+    print(f"Ideal Weight     : {data['Ideal Weight']}")
+    print(f"Water Intake     : {data['Water']}")
+    print(f"Exercise         : {data['Exercise']}")
+    print(f"Review           : {data['Review']}")
+    print(f"Target Duration  : {data['Target Days']} Days")
+    print(f"Date             : {data['Date']}")
+    print("\nRecommended Diet")
+    for food in data["Diet"]:
+        print("✓", food)
+
+print("\n" + "=" * 80)
+print("                 DAILY HEALTH SCHEDULE")
+print("=" * 80)
+
+print("""
+06:00 AM  Wake Up
+06:30 AM  Drink Warm Water
+07:00 AM  Exercise
+08:00 AM  Healthy Breakfast
+11:00 AM  Fruits
+01:00 PM  Lunch
+04:00 PM  Dry Fruits / Green Tea
+07:30 PM  Dinner
+09:30 PM  Walk
+10:30 PM  Sleep
+""")
+
+print("=" * 80)
+print("                 ALL USER RECORDS")
+print("=" * 80)
+
+for name, data in users.items():
+    print(f"{name} --> BMI: {data['BMI']} | {data['Status']}")
+
+print("\nThank You For Using BMI Health Tracker")
