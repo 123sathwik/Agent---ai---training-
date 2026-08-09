@@ -1,0 +1,517 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, EmailStr
+from typing import List
+from datetime import datetime
+from random import choice
+
+from sqlalchemy import create\_engine, Column, Integer, String, Boolean
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
+# =========================================================
+
+# FASTAPI
+
+# =========================================================
+
+app = FastAPI(title="MovieMate AI")
+
+# =========================================================
+
+# DATABASE
+
+# =========================================================
+
+DATABASE\_URL = "sqlite:///./moviemate.db"
+
+engine = create\_engine(
+DATABASE\_URL,
+connect\_args={"check\_same\_thread": False}
+)
+
+SessionLocal = sessionmaker(
+autocommit=False,
+autoflush=False,
+bind=engine
+)
+
+# =========================================================
+
+# DECLARATIVE BASE
+
+# =========================================================
+
+class Base(DeclarativeBase):
+pass
+
+# =========================================================
+
+# DATABASE MODEL
+
+# =========================================================
+
+class User(Base):
+
+```
+__tablename__ = "users"
+
+id = Column(Integer, primary_key=True, index=True)
+
+name = Column(String, unique=True, nullable=False)
+
+email = Column(String, nullable=False)
+
+password = Column(String, nullable=False)
+
+payment_method = Column(String, nullable=False)
+
+payment_done = Column(Boolean, default=False)
+```
+
+Base.metadata.create\_all(bind=engine)
+
+# =========================================================
+
+# PYDANTIC MODELS
+
+# =========================================================
+
+class UserCreate(BaseModel):
+
+```
+name: str
+email: EmailStr
+password: str
+payment_method: str
+```
+
+# Response model intentionally exposes
+
+# ONLY name, email and payment status
+
+class UserResponse(BaseModel):
+
+```
+name: str
+email: EmailStr
+payment_done: bool
+```
+
+class MovieRequest(BaseModel):
+
+```
+language: str
+genre: str
+```
+
+class BookingRequest(BaseModel):
+
+```
+name: str
+email: EmailStr
+language: str
+genre: str
+movie: str
+payment_method: str
+```
+
+# =========================================================
+
+# MOVIE TYPES
+
+# =========================================================
+
+movie\_types: List[str] = [
+"Action",
+"Comedy",
+"Horror",
+"Romance"
+]
+
+# =========================================================
+
+# MOVIES DICTIONARY
+
+# =========================================================
+
+movies = {
+
+```
+"Telugu": {
+
+    "Action": [
+        "Leo",
+        "Vikram",
+        "Jailer"
+    ],
+
+    "Comedy": [
+        "Jathiratnalu",
+        "F2",
+        "MAD"
+    ],
+
+    "Horror": [
+        "Masooda",
+        "Virupaksha",
+        "Prema Katha Chitram"
+    ],
+
+    "Romance": [
+        "Sita Ramam",
+        "Geetha Govindam",
+        "Tholi Prema"
+    ]
+},
+
+"Hindi": {
+
+    "Action": [
+        "Pathaan",
+        "War",
+        "Jawan"
+    ],
+
+    "Comedy": [
+        "Hera Pheri",
+        "3 Idiots",
+        "Munna Bhai MBBS"
+    ],
+
+    "Horror": [
+        "Stree",
+        "Bhoot",
+        "Tumbbad"
+    ],
+
+    "Romance": [
+        "Jab We Met",
+        "Tamasha",
+        "Rockstar"
+    ]
+},
+
+"English": {
+
+    "Action": [
+        "John Wick",
+        "Avengers",
+        "Mission Impossible"
+    ],
+
+    "Comedy": [
+        "Free Guy",
+        "Home Alone",
+        "The Hangover"
+    ],
+
+    "Horror": [
+        "The Conjuring",
+        "It",
+        "Insidious"
+    ],
+
+    "Romance": [
+        "Titanic",
+        "The Notebook",
+        "La La Land"
+    ]
+}
+```
+
+}
+
+# =========================================================
+
+# SHOW TIMES
+
+# =========================================================
+
+show\_times: List[str] = [
+
+```
+"10:30 AM",
+"1:30 PM",
+"4:30 PM",
+"7:30 PM",
+"10:30 PM"
+```
+
+]
+
+# =========================================================
+
+# HOME
+
+# =========================================================
+
+@app.get("/")
+def home():
+
+```
+return {
+    "message": "Welcome to MovieMate AI!"
+}
+```
+
+# =========================================================
+
+# GET MOVIE TYPES
+
+# =========================================================
+
+@app.get("/movie-types")
+def get\_movie\_types():
+
+```
+return {
+    "movie_types": movie_types
+}
+```
+
+# =========================================================
+
+# GET LANGUAGES
+
+# =========================================================
+
+@app.get("/languages")
+def get\_languages():
+
+```
+return {
+    "languages": list(movies.keys())
+}
+```
+
+# =========================================================
+
+# GET AVAILABLE MOVIES
+
+# =========================================================
+
+@app.post("/available-movies")
+def available\_movies(request: MovieRequest):
+
+```
+language = request.language.title()
+
+genre = request.genre.title()
+
+if language not in movies:
+
+    raise HTTPException(
+        status_code=404,
+        detail="Language not available"
+    )
+
+if genre not in movies[language]:
+
+    raise HTTPException(
+        status_code=404,
+        detail="Genre not available"
+    )
+
+return {
+
+    "language": language,
+
+    "genre": genre,
+
+    "movies": movies[language][genre]
+}
+```
+
+# =========================================================
+
+# CREATE USER
+
+# =========================================================
+
+@app.post("/users", response\_model=UserResponse)
+def create\_user(user: UserCreate):
+
+```
+db = SessionLocal()
+
+try:
+
+    # Duplicate name check
+
+    existing_user = (
+        db.query(User)
+        .filter(User.name == user.name)
+        .first()
+    )
+
+    if existing_user:
+
+        raise HTTPException(
+            status_code=400,
+            detail="User name already exists"
+        )
+
+    new_user = User(
+
+        name=user.name,
+
+        email=user.email,
+
+        password=user.password,
+
+        payment_method=user.payment_method,
+
+        payment_done=False
+    )
+
+    db.add(new_user)
+
+    db.commit()
+
+    db.refresh(new_user)
+
+    return new_user
+
+finally:
+
+    db.close()
+```
+
+# =========================================================
+
+# BOOK MOVIE
+
+# =========================================================
+
+@app.post("/book-movie")
+def book\_movie(booking: BookingRequest):
+
+```
+db = SessionLocal()
+
+try:
+
+    # Find user
+
+    user = (
+        db.query(User)
+        .filter(User.name == booking.name)
+        .first()
+    )
+
+    if not user:
+
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    language = booking.language.title()
+
+    genre = booking.genre.title()
+
+    # Check language
+
+    if language not in movies:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Language not available"
+        )
+
+    # Check genre
+
+    if genre not in movies[language]:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Genre not available"
+        )
+
+    # Check movie
+
+    available = movies[language][genre]
+
+    if booking.movie not in available:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Movie not available"
+        )
+
+    # Payment
+
+    user.payment_method = booking.payment_method
+
+    user.payment_done = True
+
+    db.commit()
+
+    # Random show time
+
+    selected_time = choice(show_times)
+
+    # Current date
+
+    booking_date = datetime.now()
+
+    return {
+
+        "message": "Booking Confirmed!",
+
+        "customer": user.name,
+
+        "email": user.email,
+
+        "language": language,
+
+        "movie_type": genre,
+
+        "movie": booking.movie,
+
+        "show_time": selected_time,
+
+        "booking_date": booking_date.strftime("%d-%b-%Y"),
+
+        "payment_done": user.payment_done,
+
+        "enjoy": "Enjoy your movie!"
+    }
+
+finally:
+
+    db.close()
+```
+
+# =========================================================
+
+# GET USER
+
+# =========================================================
+
+@app.get("/users/{name}", response\_model=UserResponse)
+def get\_user(name: str):
+
+```
+db = SessionLocal()
+
+try:
+
+    user = (
+        db.query(User)
+        .filter(User.name == name)
+        .first()
+    )
+
+    if not user:
+
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return user
+
+finally:
+
+    db.close() linked in post on this
+```
