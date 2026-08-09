@@ -1,0 +1,216 @@
+from datetime import datetime
+from random import choice
+from langchain_core.tools import tool
+
+
+# ============================================================
+# MOVIE DATA
+# ============================================================
+
+movies = {
+    "Action": ["Leo", "Vikram", "Jailer"],
+    "Comedy": ["Good Night", "Doctor", "Oh My Kadavule"],
+    "Horror": ["Conjuring", "Tumbbad", "Aranmanai"],
+    "Romance": ["96", "Sita Ramam", "Hi Nanna"]
+}
+
+show_times = [
+    "10:30 AM",
+    "1:30 PM",
+    "4:30 PM",
+    "7:30 PM",
+    "10:30 PM"
+]
+
+
+# ============================================================
+# TOOL 1 - GET MOVIES BY GENRE
+# ============================================================
+
+@tool
+def get_movies_by_genre(genre: str) -> list:
+    """
+    Returns available movies for the selected genre.
+    """
+
+    genre = genre.strip().title()
+
+    if genre not in movies:
+        return []
+
+    return movies[genre]
+
+
+# ============================================================
+# TOOL 2 - CHECK MOVIE
+# ============================================================
+
+@tool
+def check_movie(movie: str, genre: str) -> bool:
+    """
+    Checks whether the selected movie is available
+    under the selected genre.
+    """
+
+    available_movies = get_movies_by_genre.invoke({
+        "genre": genre
+    })
+
+    return movie.strip().lower() in [
+        m.lower() for m in available_movies
+    ]
+
+
+# ============================================================
+# TOOL 3 - GENERATE SHOW TIME
+# ============================================================
+
+@tool
+def generate_show_time() -> str:
+    """
+    Randomly selects a show time from available slots.
+    """
+
+    return choice(show_times)
+
+
+# ============================================================
+# TOOL 4 - CREATE BOOKING
+# ============================================================
+
+@tool
+def create_booking(customer: str, movie: str, show_time: str) -> str:
+    """
+    Creates the final movie booking confirmation.
+    """
+
+    booking_date = datetime.now().strftime("%d-%b-%Y")
+
+    return f"""
+Booking Confirmed!
+
+Customer : {customer}
+Movie : {movie}
+Show Time: {show_time}
+Booking Date: {booking_date}
+
+Enjoy your movie!
+"""
+
+
+# ============================================================
+# MOVIEMATE AI AGENT
+# ============================================================
+
+def moviemate_agent():
+
+    print("\n================================")
+    print("      Welcome to MovieMate AI!")
+    print("================================\n")
+
+    # --------------------------------------------------------
+    # 1. ASK USER NAME
+    # --------------------------------------------------------
+
+    name = input("Enter your name: ").strip()
+
+    if not name:
+        print("Please enter a valid name.")
+        return
+
+    # --------------------------------------------------------
+    # 2. ASK GENRE
+    # --------------------------------------------------------
+
+    print("\nChoose Genre:\n")
+
+    genres = list(movies.keys())
+
+    for index, genre in enumerate(genres, start=1):
+        print(f"{index}. {genre}")
+
+    genre_choice = input("\nEnter genre number: ").strip()
+
+    try:
+        genre_index = int(genre_choice)
+
+        if genre_index < 1 or genre_index > len(genres):
+            print("Invalid genre selection.")
+            return
+
+        selected_genre = genres[genre_index - 1]
+
+    except ValueError:
+        print("Please enter a valid number.")
+        return
+
+    # --------------------------------------------------------
+    # 3. DISPLAY AVAILABLE MOVIES
+    # --------------------------------------------------------
+
+    available_movies = get_movies_by_genre.invoke({
+        "genre": selected_genre
+    })
+
+    print("\nAvailable Movies:\n")
+
+    for index, movie in enumerate(available_movies, start=1):
+        print(f"{index}. {movie}")
+
+    # --------------------------------------------------------
+    # 4. ASK WHICH MOVIE
+    # --------------------------------------------------------
+
+    movie_choice = input("\nEnter movie number: ").strip()
+
+    try:
+        movie_index = int(movie_choice)
+
+        if movie_index < 1 or movie_index > len(available_movies):
+            print("Invalid movie selection.")
+            return
+
+        selected_movie = available_movies[movie_index - 1]
+
+    except ValueError:
+        print("Please enter a valid movie number.")
+        return
+
+    # --------------------------------------------------------
+    # 5. CHECK MOVIE
+    # --------------------------------------------------------
+
+    is_available = check_movie.invoke({
+        "movie": selected_movie,
+        "genre": selected_genre
+    })
+
+    if not is_available:
+        print("Sorry, movie is not available.")
+        return
+
+    # --------------------------------------------------------
+    # 6. RANDOM SHOW TIME
+    # --------------------------------------------------------
+
+    selected_show_time = generate_show_time.invoke({})
+
+    # --------------------------------------------------------
+    # 7. BOOK MOVIE
+    # --------------------------------------------------------
+
+    confirmation = create_booking.invoke({
+        "customer": name,
+        "movie": selected_movie,
+        "show_time": selected_show_time
+    })
+
+    print(confirmation)
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+if __name__ == "__main__":
+    moviemate_agent()
