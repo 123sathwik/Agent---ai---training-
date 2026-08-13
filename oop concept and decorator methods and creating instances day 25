@@ -1,0 +1,51 @@
+class product:
+    platform = "amazon"
+    charge = 50
+    
+    def __init__(self, name, prize):
+        self.name = name
+        self.prize = prize  # Base price
+        
+    @classmethod
+    def update(cls):
+        cls.charge = 60
+        print(f"Class charge updated globally to: {cls.charge}")
+        
+    def display(self):
+        # Adds current product.charge to self.prize
+        self.prize = self.prize + product.charge
+        print(f"Prize after display calculation: {self.prize}")
+        
+    @staticmethod
+    def free(obj, input_price):
+        # FIXED: We pass 'obj' so the static method can modify instance properties
+        if input_price >= 30000:
+            delivery_charge = 0
+            # Update the actual object's prize directly
+            obj.prize = input_price + delivery_charge
+            return f"Free delivery! Object prize updated to: {obj.prize}"
+        else:
+            product.update()  # Triggers class charge update to 60
+            # Update the actual object's prize using the updated class charge
+            obj.prize = input_price + product.charge
+            return f"Standard shipping added! Object prize updated to: {obj.prize}"
+
+# --- Execution ---
+# 1. Create product with initial price of 20000
+p1 = product("iphone", 20000)
+print("Original charge:", p1.charge)  # Output: 50
+
+# 2. Update class charge to 60
+p1.update()  
+
+# 3. Display method updates p1.prize (20000 + 60 = 20060)
+p1.display()  
+
+# 4. STATIC METHOD UPDATE: 
+# We pass the object 'p1' and our test price '25000' (under 30000 to trigger the else block)
+# This will use the updated_charge (60) and save it directly into p1.prize
+shipping_result = product.free(p1, 25000)
+print("Static Method Result:", shipping_result)
+
+# 5. Check object dictionary to verify p1.prize has changed!
+print("Final Object Dictionary:", p1.__dict__)
