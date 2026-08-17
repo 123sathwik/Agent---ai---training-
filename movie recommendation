@@ -1,0 +1,154 @@
+from datetime import datetime
+import random
+
+
+class UserSession:
+    """Base Class: Tracks user onboarding details."""
+
+    def __init__(self):
+        self.username = ""
+        self.selected_genre = ""
+
+    def greet_user(self):
+        print("Welcome to MovieMate AI!\n")
+        self.username = input("Enter your name: ").strip()
+
+    def select_genre(self):
+        print("\nChoose Genre:\n")
+        print("1. Action\n2. Comedy\n3. Horror\n4. Romance")
+        choice = input("\nEnter choice: ").strip().lower()
+
+        if "action" in choice or choice == "1":
+            self.selected_genre = "Action"
+        elif "comedy" in choice or choice == "2":
+            self.selected_genre = "Comedy"
+        elif "horror" in choice or choice == "3":
+            self.selected_genre = "Horror"
+        elif "romance" in choice or choice == "4":
+            self.selected_genre = "Romance"
+        else:
+            print("Invalid genre. Defaulting to Action.")
+            self.selected_genre = "Action"
+
+
+class MovieCatalog(UserSession):
+    """Intermediate Class: Inherits UserSession and manages movie lookups."""
+
+    def __init__(self):
+        super().__init__()
+        self._database = {
+            "Action": ["Leo", "Vikram", "Jailer"],
+            "Comedy": ["Welcome", "Dhamaal", "Hera Pheri"],
+            "Horror": ["The Conjuring", "Tumbbad", "Stree"],
+            "Romance": ["La La Land", "Titanic", "Sita Ramam"],
+        }
+        self.selected_movie = ""
+
+    def display_and_select_movie(self):
+        movies = self._database.get(self.selected_genre, [])
+        print("\nAvailable Movies:\n")
+        for movie in movies:
+            print(f"- {movie}")
+
+        while True:
+            choice = input("\nEnter movie: ").strip()
+            match = next(
+                (m for m in movies if m.lower() == choice.lower()), None
+            )
+            if match:
+                self.selected_movie = match
+                break
+            print("That movie is not in the list. Please try again.")
+
+
+class MovieMateAgent(MovieCatalog):
+    """Intermediate Class: Handles time slots and dynamic seat pools."""
+
+    def __init__(self):
+        super().__init__()
+        self.time_slots = ["11:00 AM", "2:30 PM", "6:15 PM", "7:30 PM", "9:45 PM"]
+        self.selected_time = ""
+        # Randomise available seats using randint (e.g., between 5 and 50 seats left)
+        self.available_seats = random.randint(5, 50)
+
+    def select_time_slot(self):
+        """Displays time slots alongside dynamically generated seat updates."""
+        print("\nAvailable Show Times:")
+        for idx, slot in enumerate(self.time_slots, 1):
+            print(f"{idx}. {slot}")
+
+        while True:
+            try:
+                choice = int(input("\nSelect a time slot (number): "))
+                if 1 <= choice <= len(self.time_slots):
+                    self.selected_time = self.time_slots[choice - 1]
+                    break
+                print("Invalid selection. Please choose a number from the list.")
+            except ValueError:
+                print("Please enter a valid number.")
+
+        print(f"\n⚡ Total Available Seats for this show: {self.available_seats}")
+
+
+# --- NEW EXTENDED MULTILEVEL LEVEL ---
+class BookingSystem(MovieMateAgent):
+    """Final Derived Class: Finalises details, user credentials, and displays summary."""
+
+    def __init__(self):
+        super().__init__()
+        self.ticket_count = 0
+        self.email = ""
+        self.phone = ""
+
+    def collect_booking_details(self):
+        """Validates ticket counts against real-time seat ceilings and stores contacts."""
+        while True:
+            try:
+                self.ticket_count = int(input("\nEnter number of tickets to book: "))
+                if self.ticket_count <= 0:
+                    print("Please book at least 1 ticket.")
+                elif self.ticket_count > self.available_seats:
+                    print(f"Sorry! Only {self.available_seats} seats are left.")
+                else:
+                    break
+            except ValueError:
+                print("Please enter a valid integer.")
+
+        self.email = input("Enter your Email ID: ").strip()
+        self.phone = input("Enter your Phone Number: ").strip()
+
+    def generate_final_ticket(self):
+        """Compiles standard layout adding custom help desks support headers."""
+        current_date = datetime.now().strftime("%d-%b-%Y")
+
+        print("\n" + "=" * 40)
+        print("---BOOKING CONFIRMED!---")
+        print("=" * 40)
+        print(f"Customer       : {self.username}")
+        print(f"Movie          : {self.selected_movie}")
+        print(f"Show Time      : {self.selected_time}")
+        print(f"Booking Date   : {current_date}")
+        print(f"Tickets Booked : {self.ticket_count}")
+        print(f"Registered Email: {self.email}")
+        print(f"Phone Number   : {self.phone}")
+        print("-" * 40)
+        print("For any query, please contact codegnan.com")
+        print("=" * 40)
+        print("Enjoy your movie!")
+
+    def start_agent(self):
+        """Runs the fully complete operational pipeline sequentially across all layers."""
+        self.greet_user()                # Level 1 (UserSession)
+        self.select_genre()               # Level 1 (UserSession)
+        self.display_and_select_movie()  # Level 2 (MovieCatalog)
+        self.select_time_slot()          # Level 3 (MovieMateAgent)
+        self.collect_booking_details()   # Level 4 (BookingSystem)
+        self.generate_final_ticket()     # Level 4 (BookingSystem)
+
+
+# ==========================================
+# DRIVER CODE
+# ==========================================
+if __name__ == "__main__":
+    agent = BookingSystem()
+    agent.start_agent()
