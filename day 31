@@ -1,0 +1,66 @@
+import numpy as np
+
+documents = {
+    "A": np.array([1.0, 0.0]),
+    "B": np.array([0.9, 0.1]),
+    "C": np.array([0.0, 1.0])
+}
+
+query = np.array([1.0, 0.0])
+
+scores = {}
+
+for name, vector in documents.items():
+
+    score = np.dot(query, vector) / (
+        np.linalg.norm(query) *
+        np.linalg.norm(vector)
+    )
+
+    scores[name] = score
+
+print(scores)
+
+ranked = sorted(
+    scores.items(),
+    key=lambda x: x[1],
+    reverse=True
+)
+
+print(ranked)
+top_k = ranked[:2]
+
+print(top_k)
+
+
+
+def rrf(results, k=60):
+
+    scores = {}
+
+    for ranking in results:
+
+        for rank, document in enumerate(
+            ranking,
+            start=1
+        ):
+
+            scores[document] = (
+                scores.get(document, 0)
+                + 1 / (k + rank)
+            )
+
+    return sorted(
+        scores.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+bm25 = ["A", "B", "C"]
+
+vector = ["B", "A", "D"]
+
+results = rrf(
+    [bm25, vector]
+)
+
+print(results)
