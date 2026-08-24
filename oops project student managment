@@ -1,0 +1,1682 @@
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+
+# =====================================================================
+# 1. ABSTRACT BASE CLASS
+# =====================================================================
+
+class User(ABC):
+
+    def __init__(self, user_id, name, email):
+        self._user_id = user_id
+        self.name = name
+        self.email = email
+
+    @abstractmethod
+    def view_dashboard(self):
+        pass
+
+
+# =====================================================================
+# 2. COURSE CLASS
+# =====================================================================
+
+class Course:
+
+    def __init__(self, course_code, course_name, timeslot):
+        self.course_code = course_code
+        self.course_name = course_name
+        self.timeslot = timeslot
+        self.instructor = None
+        self.roster = []
+
+    def set_instructor(self, faculty):
+        self.instructor = faculty
+
+    def add_student(self, student):
+
+        if student not in self.roster:
+            self.roster.append(student)
+
+    def __str__(self):
+
+        instructor = (
+            self.instructor.name
+            if self.instructor
+            else "Not Assigned"
+        )
+
+        return (
+            f"[{self.course_code}] "
+            f"{self.course_name} | "
+            f"{self.timeslot} | "
+            f"Faculty: {instructor}"
+        )
+
+
+# =====================================================================
+# 3. STUDENT CLASS
+# =====================================================================
+
+class Student(User):
+
+    def __init__(self, student_id, name, email):
+
+        super().__init__(
+            student_id,
+            name,
+            email
+        )
+
+        self.enrolled_courses = []
+
+        # Encapsulation
+        self.__grades = {}
+        self.__attendance_log = {}
+
+    # -----------------------------------------------------------------
+    # ENROLL COURSE
+    # -----------------------------------------------------------------
+
+    def enroll(self, course):
+
+        if course in self.enrolled_courses:
+
+            print("\nAlready enrolled in this course.")
+
+            return False
+
+        self.enrolled_courses.append(course)
+
+        course.add_student(self)
+
+        print(
+            f"\nSuccessfully enrolled in "
+            f"{course.course_code}."
+        )
+
+        return True
+
+    # -----------------------------------------------------------------
+    # ATTENDANCE
+    # -----------------------------------------------------------------
+
+    def mark_attendance(self, status="Present"):
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        self.__attendance_log[today] = status.upper()
+
+        print(
+            f"\nAttendance marked as {status.upper()}."
+        )
+
+    def get_attendance_report(self):
+
+        return self.__attendance_log
+
+    # -----------------------------------------------------------------
+    # GRADES
+    # -----------------------------------------------------------------
+
+    def add_grade(self, course, grade):
+
+        if course not in self.enrolled_courses:
+
+            print(
+                "\nStudent is not enrolled in this course."
+            )
+
+            return False
+
+        self.__grades[course] = grade.upper()
+
+        return True
+
+    def get_grades(self):
+
+        return self.__grades
+
+    # -----------------------------------------------------------------
+    # DASHBOARD
+    # -----------------------------------------------------------------
+
+    def view_dashboard(self):
+
+        print("\n" + "=" * 60)
+
+        print(
+            f"STUDENT DASHBOARD - "
+            f"{self.name.upper()}"
+        )
+
+        print("=" * 60)
+
+        print(f"Student ID : {self._user_id}")
+        print(f"Name       : {self.name}")
+        print(f"Email      : {self.email}")
+
+        # -------------------------------------------------------------
+        # COURSES
+        # -------------------------------------------------------------
+
+        print("\n--- ENROLLED COURSES ---")
+
+        if not self.enrolled_courses:
+
+            print("No courses enrolled.")
+
+        else:
+
+            for course in self.enrolled_courses:
+
+                print(
+                    f"{course.course_code} - "
+                    f"{course.course_name} | "
+                    f"{course.timeslot}"
+                )
+
+        # -------------------------------------------------------------
+        # GRADES
+        # -------------------------------------------------------------
+
+        print("\n--- GRADES ---")
+
+        if not self.__grades:
+
+            print("No grades available.")
+
+        else:
+
+            for course, grade in self.__grades.items():
+
+                print(
+                    f"{course.course_code} : {grade}"
+                )
+
+        # -------------------------------------------------------------
+        # ATTENDANCE
+        # -------------------------------------------------------------
+
+        print("\n--- ATTENDANCE ---")
+
+        if not self.__attendance_log:
+
+            print("Attendance not marked.")
+
+        else:
+
+            for date, status in self.__attendance_log.items():
+
+                print(
+                    f"{date} : {status}"
+                )
+
+        print("=" * 60)
+
+
+# =====================================================================
+# 4. UNDERGRADUATE STUDENT
+# =====================================================================
+
+class UndergraduateStudent(Student):
+
+    def enroll(self, course):
+
+        if len(self.enrolled_courses) >= 3:
+
+            print(
+                "\nEnrollment denied!"
+            )
+
+            print(
+                "Undergraduate students can "
+                "enroll in maximum 3 courses."
+            )
+
+            return False
+
+        return super().enroll(course)
+
+
+# =====================================================================
+# 5. GRADUATE STUDENT
+# =====================================================================
+
+class GraduateStudent(Student):
+
+    def __init__(
+        self,
+        student_id,
+        name,
+        email,
+        thesis_topic
+    ):
+
+        super().__init__(
+            student_id,
+            name,
+            email
+        )
+
+        self.thesis_topic = thesis_topic
+
+    def view_dashboard(self):
+
+        super().view_dashboard()
+
+        print(
+            f"\nThesis Topic : "
+            f"{self.thesis_topic}"
+        )
+
+
+# =====================================================================
+# 6. FACULTY CLASS
+# =====================================================================
+
+class Faculty(User):
+
+    def __init__(
+        self,
+        faculty_id,
+        name,
+        email,
+        department,
+        salary
+    ):
+
+        super().__init__(
+            faculty_id,
+            name,
+            email
+        )
+
+        self.department = department
+
+        self.assigned_courses = []
+
+        # Encapsulation
+        self.__salary = salary
+        self.__attendance_log = {}
+
+    # -----------------------------------------------------------------
+    # ASSIGN COURSE
+    # -----------------------------------------------------------------
+
+    def assign_course(self, course):
+
+        if course in self.assigned_courses:
+
+            print(
+                "\nCourse already assigned."
+            )
+
+            return False
+
+        self.assigned_courses.append(course)
+
+        course.set_instructor(self)
+
+        print(
+            f"\nCourse {course.course_code} "
+            f"assigned successfully."
+        )
+
+        return True
+
+    # -----------------------------------------------------------------
+    # ATTENDANCE
+    # -----------------------------------------------------------------
+
+    def mark_attendance(self, status="Present"):
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        self.__attendance_log[today] = status.upper()
+
+        print(
+            f"\nFaculty attendance marked "
+            f"as {status.upper()}."
+        )
+
+    def get_attendance_report(self):
+
+        return self.__attendance_log
+
+    # -----------------------------------------------------------------
+    # SALARY
+    # -----------------------------------------------------------------
+
+    def get_salary(self):
+
+        return self.__salary
+
+    # -----------------------------------------------------------------
+    # DASHBOARD
+    # -----------------------------------------------------------------
+
+    def view_dashboard(self):
+
+        print("\n" + "=" * 60)
+
+        print(
+            f"FACULTY DASHBOARD - "
+            f"{self.name.upper()}"
+        )
+
+        print("=" * 60)
+
+        print(f"Faculty ID  : {self._user_id}")
+        print(f"Name        : {self.name}")
+        print(f"Email       : {self.email}")
+        print(f"Department  : {self.department}")
+        print(f"Salary      : ₹{self.__salary:,.2f}")
+
+        # -------------------------------------------------------------
+        # ASSIGNED COURSES
+        # -------------------------------------------------------------
+
+        print("\n--- ASSIGNED COURSES ---")
+
+        if not self.assigned_courses:
+
+            print("No courses assigned.")
+
+        else:
+
+            for course in self.assigned_courses:
+
+                print(
+                    f"{course.course_code} - "
+                    f"{course.course_name} | "
+                    f"{course.timeslot}"
+                )
+
+        # -------------------------------------------------------------
+        # STUDENT ROSTER
+        # -------------------------------------------------------------
+
+        print("\n--- STUDENT ROSTERS ---")
+
+        if not self.assigned_courses:
+
+            print("No courses assigned.")
+
+        else:
+
+            for course in self.assigned_courses:
+
+                print(
+                    f"\nCourse: {course.course_code}"
+                )
+
+                if not course.roster:
+
+                    print("  No students enrolled.")
+
+                else:
+
+                    for student in course.roster:
+
+                        print(
+                            f"  - "
+                            f"{student._user_id} | "
+                            f"{student.name}"
+                        )
+
+        print("=" * 60)
+
+
+# =====================================================================
+# 7. UNIVERSITY CLASS
+# =====================================================================
+
+class University:
+
+    def __init__(self, name):
+
+        self.name = name
+
+        self.students = {}
+
+        self.faculty_members = {}
+
+        self.courses = {}
+
+    # -----------------------------------------------------------------
+    # ADD STUDENT
+    # -----------------------------------------------------------------
+
+    def add_student(self, student):
+
+        if student._user_id in self.students:
+
+            print(
+                "\nStudent ID already exists."
+            )
+
+            return False
+
+        self.students[student._user_id] = student
+
+        print(
+            "\nStudent added successfully."
+        )
+
+        return True
+
+    # -----------------------------------------------------------------
+    # ADD FACULTY
+    # -----------------------------------------------------------------
+
+    def add_faculty(self, faculty):
+
+        if faculty._user_id in self.faculty_members:
+
+            print(
+                "\nFaculty ID already exists."
+            )
+
+            return False
+
+        self.faculty_members[faculty._user_id] = faculty
+
+        print(
+            "\nFaculty added successfully."
+        )
+
+        return True
+
+    # -----------------------------------------------------------------
+    # ADD COURSE
+    # -----------------------------------------------------------------
+
+    def add_course(self, course):
+
+        if course.course_code in self.courses:
+
+            print(
+                "\nCourse code already exists."
+            )
+
+            return False
+
+        self.courses[course.course_code] = course
+
+        print(
+            "\nCourse added successfully."
+        )
+
+        return True
+
+
+# =====================================================================
+# 8. MANAGEMENT SYSTEM
+# =====================================================================
+
+class ManagementSystem(University):
+
+    def view_dashboard(self):
+
+        print("\n" + "=" * 70)
+
+        print(
+            f"      {self.name.upper()} "
+            f"MANAGEMENT DASHBOARD"
+        )
+
+        print("=" * 70)
+
+        print(
+            f"Total Students : "
+            f"{len(self.students)}"
+        )
+
+        print(
+            f"Total Faculty  : "
+            f"{len(self.faculty_members)}"
+        )
+
+        print(
+            f"Total Courses  : "
+            f"{len(self.courses)}"
+        )
+
+        # -------------------------------------------------------------
+        # COURSES
+        # -------------------------------------------------------------
+
+        print("\n--- COURSES ---")
+
+        if not self.courses:
+
+            print("No courses available.")
+
+        else:
+
+            for course in self.courses.values():
+
+                print(course)
+
+        # -------------------------------------------------------------
+        # STUDENTS
+        # -------------------------------------------------------------
+
+        print("\n--- STUDENTS ---")
+
+        if not self.students:
+
+            print("No students registered.")
+
+        else:
+
+            for student in self.students.values():
+
+                courses = ", ".join(
+                    c.course_code
+                    for c in student.enrolled_courses
+                )
+
+                if not courses:
+                    courses = "None"
+
+                print(
+                    f"{student._user_id} | "
+                    f"{student.name} | "
+                    f"Courses: {courses}"
+                )
+
+        # -------------------------------------------------------------
+        # FACULTY
+        # -------------------------------------------------------------
+
+        print("\n--- FACULTY ---")
+
+        if not self.faculty_members:
+
+            print("No faculty registered.")
+
+        else:
+
+            for faculty in self.faculty_members.values():
+
+                courses = ", ".join(
+                    c.course_code
+                    for c in faculty.assigned_courses
+                )
+
+                if not courses:
+                    courses = "None"
+
+                print(
+                    f"{faculty._user_id} | "
+                    f"{faculty.name} | "
+                    f"Department: {faculty.department} | "
+                    f"Courses: {courses}"
+                )
+
+        print("=" * 70)
+
+
+# =====================================================================
+# 9. ADD COURSE FROM USER INPUT
+# =====================================================================
+
+def create_course(system):
+
+    print("\n" + "-" * 50)
+
+    print("ADD NEW COURSE")
+
+    print("-" * 50)
+
+    course_code = input(
+        "Enter Course Code: "
+    ).strip().upper()
+
+    course_name = input(
+        "Enter Course Name: "
+    ).strip()
+
+    timeslot = input(
+        "Enter Course Timetable: "
+    ).strip()
+
+    course = Course(
+        course_code,
+        course_name,
+        timeslot
+    )
+
+    system.add_course(course)
+
+
+# =====================================================================
+# 10. ADD FACULTY FROM USER INPUT
+# =====================================================================
+
+def create_faculty(system):
+
+    print("\n" + "-" * 50)
+
+    print("ADD NEW FACULTY")
+
+    print("-" * 50)
+
+    faculty_id = input(
+        "Enter Faculty ID: "
+    ).strip().upper()
+
+    name = input(
+        "Enter Faculty Name: "
+    ).strip()
+
+    email = input(
+        "Enter Faculty Email: "
+    ).strip()
+
+    department = input(
+        "Enter Department: "
+    ).strip()
+
+    while True:
+
+        try:
+
+            salary = float(
+                input("Enter Faculty Salary: ")
+            )
+
+            if salary < 0:
+
+                print(
+                    "Salary cannot be negative."
+                )
+
+                continue
+
+            break
+
+        except ValueError:
+
+            print(
+                "Please enter a valid number."
+            )
+
+    faculty = Faculty(
+        faculty_id,
+        name,
+        email,
+        department,
+        salary
+    )
+
+    system.add_faculty(faculty)
+
+
+# =====================================================================
+# 11. ADD STUDENT FROM USER INPUT
+# =====================================================================
+
+def create_student(system):
+
+    print("\n" + "-" * 50)
+
+    print("ADD NEW STUDENT")
+
+    print("-" * 50)
+
+    student_id = input(
+        "Enter Student ID: "
+    ).strip().upper()
+
+    name = input(
+        "Enter Student Name: "
+    ).strip()
+
+    email = input(
+        "Enter Student Email: "
+    ).strip()
+
+    print("\nSelect Student Type:")
+
+    print("1. Undergraduate")
+    print("2. Graduate")
+
+    student_type = input(
+        "Enter choice: "
+    ).strip()
+
+    if student_type == "1":
+
+        student = UndergraduateStudent(
+            student_id,
+            name,
+            email
+        )
+
+    elif student_type == "2":
+
+        thesis_topic = input(
+            "Enter Thesis Topic: "
+        ).strip()
+
+        student = GraduateStudent(
+            student_id,
+            name,
+            email,
+            thesis_topic
+        )
+
+    else:
+
+        print(
+            "\nInvalid student type."
+        )
+
+        return
+
+    system.add_student(student)
+
+
+# =====================================================================
+# 12. DISPLAY COURSES
+# =====================================================================
+
+def display_courses(system):
+
+    print("\n--- AVAILABLE COURSES ---")
+
+    if not system.courses:
+
+        print("No courses available.")
+
+        return
+
+    for course in system.courses.values():
+
+        print(course)
+
+
+# =====================================================================
+# 13. ASSIGN FACULTY TO COURSE
+# =====================================================================
+
+def assign_faculty_to_course(system):
+
+    if not system.faculty_members:
+
+        print(
+            "\nNo faculty members available."
+        )
+
+        return
+
+    if not system.courses:
+
+        print(
+            "\nNo courses available."
+        )
+
+        return
+
+    print("\n--- FACULTY ---")
+
+    for faculty in system.faculty_members.values():
+
+        print(
+            f"{faculty._user_id} - "
+            f"{faculty.name}"
+        )
+
+    faculty_id = input(
+        "\nEnter Faculty ID: "
+    ).strip().upper()
+
+    if faculty_id not in system.faculty_members:
+
+        print(
+            "\nFaculty not found."
+        )
+
+        return
+
+    print("\n--- COURSES ---")
+
+    for course in system.courses.values():
+
+        print(
+            f"{course.course_code} - "
+            f"{course.course_name}"
+        )
+
+    course_code = input(
+        "\nEnter Course Code: "
+    ).strip().upper()
+
+    if course_code not in system.courses:
+
+        print(
+            "\nCourse not found."
+        )
+
+        return
+
+    faculty = system.faculty_members[faculty_id]
+
+    course = system.courses[course_code]
+
+    faculty.assign_course(course)
+
+
+# =====================================================================
+# 14. ENROLL STUDENT IN COURSE
+# =====================================================================
+
+def enroll_student_in_course(system):
+
+    if not system.students:
+
+        print(
+            "\nNo students available."
+        )
+
+        return
+
+    if not system.courses:
+
+        print(
+            "\nNo courses available."
+        )
+
+        return
+
+    print("\n--- STUDENTS ---")
+
+    for student in system.students.values():
+
+        print(
+            f"{student._user_id} - "
+            f"{student.name}"
+        )
+
+    student_id = input(
+        "\nEnter Student ID: "
+    ).strip().upper()
+
+    if student_id not in system.students:
+
+        print(
+            "\nStudent not found."
+        )
+
+        return
+
+    display_courses(system)
+
+    course_code = input(
+        "\nEnter Course Code: "
+    ).strip().upper()
+
+    if course_code not in system.courses:
+
+        print(
+            "\nCourse not found."
+        )
+
+        return
+
+    student = system.students[student_id]
+
+    course = system.courses[course_code]
+
+    student.enroll(course)
+
+
+# =====================================================================
+# 15. STUDENT LOGIN MENU
+# =====================================================================
+
+def student_login(system):
+
+    student_id = input(
+        "\nEnter Student ID: "
+    ).strip().upper()
+
+    if student_id not in system.students:
+
+        print(
+            "\nStudent ID not found."
+        )
+
+        return
+
+    student = system.students[student_id]
+
+    while True:
+
+        print("\n" + "=" * 45)
+
+        print(
+            f"STUDENT MENU - {student.name}"
+        )
+
+        print("=" * 45)
+
+        print("1. View Dashboard")
+        print("2. Mark Attendance")
+        print("3. Enroll in Course")
+        print("4. View Grades")
+        print("5. Logout")
+
+        choice = input(
+            "\nEnter choice: "
+        ).strip()
+
+        # -------------------------------------------------------------
+        # DASHBOARD
+        # -------------------------------------------------------------
+
+        if choice == "1":
+
+            student.view_dashboard()
+
+        # -------------------------------------------------------------
+        # ATTENDANCE
+        # -------------------------------------------------------------
+
+        elif choice == "2":
+
+            print("\n1. Present")
+            print("2. Absent")
+
+            status_choice = input(
+                "Enter choice: "
+            ).strip()
+
+            if status_choice == "1":
+
+                student.mark_attendance("Present")
+
+            elif status_choice == "2":
+
+                student.mark_attendance("Absent")
+
+            else:
+
+                print(
+                    "\nInvalid attendance choice."
+                )
+
+        # -------------------------------------------------------------
+        # ENROLL
+        # -------------------------------------------------------------
+
+        elif choice == "3":
+
+            display_courses(system)
+
+            course_code = input(
+                "\nEnter Course Code: "
+            ).strip().upper()
+
+            if course_code in system.courses:
+
+                student.enroll(
+                    system.courses[course_code]
+                )
+
+            else:
+
+                print(
+                    "\nInvalid Course Code."
+                )
+
+        # -------------------------------------------------------------
+        # GRADES
+        # -------------------------------------------------------------
+
+        elif choice == "4":
+
+            grades = student.get_grades()
+
+            print("\n--- YOUR GRADES ---")
+
+            if not grades:
+
+                print("No grades available.")
+
+            else:
+
+                for course, grade in grades.items():
+
+                    print(
+                        f"{course.course_code} : "
+                        f"{grade}"
+                    )
+
+        # -------------------------------------------------------------
+        # LOGOUT
+        # -------------------------------------------------------------
+
+        elif choice == "5":
+
+            print(
+                "\nLogged out successfully."
+            )
+
+            break
+
+        else:
+
+            print(
+                "\nInvalid choice."
+            )
+
+
+# =====================================================================
+# 16. FACULTY LOGIN MENU
+# =====================================================================
+
+def faculty_login(system):
+
+    faculty_id = input(
+        "\nEnter Faculty ID: "
+    ).strip().upper()
+
+    if faculty_id not in system.faculty_members:
+
+        print(
+            "\nFaculty ID not found."
+        )
+
+        return
+
+    faculty = system.faculty_members[faculty_id]
+
+    while True:
+
+        print("\n" + "=" * 45)
+
+        print(
+            f"FACULTY MENU - {faculty.name}"
+        )
+
+        print("=" * 45)
+
+        print("1. View Dashboard")
+        print("2. Mark Attendance")
+        print("3. Assign Student Grade")
+        print("4. Logout")
+
+        choice = input(
+            "\nEnter choice: "
+        ).strip()
+
+        # -------------------------------------------------------------
+        # DASHBOARD
+        # -------------------------------------------------------------
+
+        if choice == "1":
+
+            faculty.view_dashboard()
+
+        # -------------------------------------------------------------
+        # ATTENDANCE
+        # -------------------------------------------------------------
+
+        elif choice == "2":
+
+            print("\n1. Present")
+            print("2. Absent")
+
+            status_choice = input(
+                "Enter choice: "
+            ).strip()
+
+            if status_choice == "1":
+
+                faculty.mark_attendance("Present")
+
+            elif status_choice == "2":
+
+                faculty.mark_attendance("Absent")
+
+            else:
+
+                print(
+                    "\nInvalid attendance choice."
+                )
+
+        # -------------------------------------------------------------
+        # ASSIGN GRADE
+        # -------------------------------------------------------------
+
+        elif choice == "3":
+
+            if not system.students:
+
+                print(
+                    "\nNo students available."
+                )
+
+                continue
+
+            print("\n--- STUDENTS ---")
+
+            for student in system.students.values():
+
+                print(
+                    f"{student._user_id} - "
+                    f"{student.name}"
+                )
+
+            student_id = input(
+                "\nEnter Student ID: "
+            ).strip().upper()
+
+            if student_id not in system.students:
+
+                print(
+                    "\nStudent not found."
+                )
+
+                continue
+
+            student = system.students[student_id]
+
+            if not student.enrolled_courses:
+
+                print(
+                    "\nThis student has "
+                    "no enrolled courses."
+                )
+
+                continue
+
+            print(
+                f"\nCourses of {student.name}:"
+            )
+
+            for course in student.enrolled_courses:
+
+                print(
+                    f"{course.course_code} - "
+                    f"{course.course_name}"
+                )
+
+            course_code = input(
+                "\nEnter Course Code: "
+            ).strip().upper()
+
+            matching_course = None
+
+            for course in student.enrolled_courses:
+
+                if course.course_code == course_code:
+
+                    matching_course = course
+
+                    break
+
+            if matching_course is None:
+
+                print(
+                    "\nStudent is not enrolled "
+                    "in this course."
+                )
+
+                continue
+
+            grade = input(
+                "\nEnter Grade "
+                "(A+, A, B+, B, C, etc.): "
+            ).strip().upper()
+
+            student.add_grade(
+                matching_course,
+                grade
+            )
+
+            print(
+                "\nGrade assigned successfully."
+            )
+
+        # -------------------------------------------------------------
+        # LOGOUT
+        # -------------------------------------------------------------
+
+        elif choice == "4":
+
+            print(
+                "\nLogged out successfully."
+            )
+
+            break
+
+        else:
+
+            print(
+                "\nInvalid choice."
+            )
+
+
+# =====================================================================
+# 17. ADMIN MENU
+# =====================================================================
+
+def admin_menu(system):
+
+    while True:
+
+        print("\n" + "=" * 55)
+
+        print(
+            "ADMINISTRATION CONTROL PANEL"
+        )
+
+        print("=" * 55)
+
+        print("1. View Dashboard")
+        print("2. Add Student")
+        print("3. Add Faculty")
+        print("4. Add Course")
+        print("5. Assign Faculty to Course")
+        print("6. Enroll Student in Course")
+        print("7. View All Courses")
+        print("8. Logout")
+
+        choice = input(
+            "\nEnter choice: "
+        ).strip()
+
+        if choice == "1":
+
+            system.view_dashboard()
+
+        elif choice == "2":
+
+            create_student(system)
+
+        elif choice == "3":
+
+            create_faculty(system)
+
+        elif choice == "4":
+
+            create_course(system)
+
+        elif choice == "5":
+
+            assign_faculty_to_course(system)
+
+        elif choice == "6":
+
+            enroll_student_in_course(system)
+
+        elif choice == "7":
+
+            display_courses(system)
+
+        elif choice == "8":
+
+            print(
+                "\nLogged out from administration."
+            )
+
+            break
+
+        else:
+
+            print(
+                "\nInvalid choice."
+            )
+
+
+# =====================================================================
+# 18. MAIN PROGRAM
+# =====================================================================
+
+def main():
+
+    print("\n" + "=" * 60)
+
+    print(
+        "       UNIVERSITY MANAGEMENT SYSTEM"
+    )
+
+    print("=" * 60)
+
+    # -------------------------------------------------------------
+    # UNIVERSITY NAME FROM USER
+    # -------------------------------------------------------------
+
+    while True:
+
+        university_name = input(
+            "\nEnter University Name: "
+        ).strip()
+
+        if university_name:
+
+            break
+
+        print(
+            "University name cannot be empty."
+        )
+
+    system = ManagementSystem(
+        university_name
+    )
+
+    # -------------------------------------------------------------
+    # INITIAL SETUP
+    # -------------------------------------------------------------
+
+    print("\n" + "=" * 60)
+
+    print("       UNIVERSITY INITIAL SETUP")
+
+    print("=" * 60)
+
+    while True:
+
+        print("\n--- SETUP MENU ---")
+
+        print("1. Add Course")
+        print("2. Add Faculty")
+        print("3. Add Student")
+        print("4. Assign Faculty to Course")
+        print("5. Enroll Student in Course")
+        print("6. Finish Setup")
+
+        choice = input(
+            "\nEnter choice: "
+        ).strip()
+
+        if choice == "1":
+
+            create_course(system)
+
+        elif choice == "2":
+
+            create_faculty(system)
+
+        elif choice == "3":
+
+            create_student(system)
+
+        elif choice == "4":
+
+            assign_faculty_to_course(system)
+
+        elif choice == "5":
+
+            enroll_student_in_course(system)
+
+        elif choice == "6":
+
+            break
+
+        else:
+
+            print(
+                "\nInvalid choice."
+            )
+
+    # -------------------------------------------------------------
+    # MAIN SYSTEM
+    # -------------------------------------------------------------
+
+    while True:
+
+        print("\n" + "=" * 60)
+
+        print(
+            f"       {system.name.upper()}"
+        )
+
+        print(
+            "       MANAGEMENT SYSTEM"
+        )
+
+        print("=" * 60)
+
+        print("1. Student Login")
+        print("2. Faculty Login")
+        print("3. Administration")
+        print("4. Exit")
+
+        choice = input(
+            "\nEnter choice: "
+        ).strip()
+
+        # -------------------------------------------------------------
+        # STUDENT
+        # -------------------------------------------------------------
+
+        if choice == "1":
+
+            student_login(system)
+
+        # -------------------------------------------------------------
+        # FACULTY
+        # -------------------------------------------------------------
+
+        elif choice == "2":
+
+            faculty_login(system)
+
+        # -------------------------------------------------------------
+        # ADMIN
+        # -------------------------------------------------------------
+
+        elif choice == "3":
+
+            admin_menu(system)
+
+        # -------------------------------------------------------------
+        # EXIT
+        # -------------------------------------------------------------
+
+        elif choice == "4":
+
+            print(
+                "\nThank you for using "
+                "University Management System!"
+            )
+
+            print(
+                "Program terminated."
+            )
+
+            break
+
+        else:
+
+            print(
+                "\nInvalid choice. "
+                "Please enter 1-4."
+            )
+
+
+# =====================================================================
+# 19. PROGRAM ENTRY POINT
+# =====================================================================
+
+if __name__ == "__main__":
+    main()
+
+
+# Online Python compiler (interpreter) to run Python online.
+# Write Python 3 code in this online editor and run it.
+'''
+print("Start small. Ship something.")
+a=[10,11,12]
+b=a
+b[0]=19
+print(b)
+print(a)
+numbers=[1,2,3,4,5,1,2,3,4]
+fr={}
+for i in numbers:
+    fr[i]=fr.get(i,0)+1
+print(fr)
+l1=["name","age","course"]
+l2=["sathwik",20,"python"]
+z=dict(zip(l1,l2))
+print(z)
+d = {}
+
+for i in range(3):
+    key, value = input("Enter name and marks: ").split()
+
+    value = int(value)
+
+    d[key] = value
+    if value >= 80:
+        print(f"The name of the student is {key} and score is {value}")
+
+print(d)
+'''
+x = list(map(int,input("enter").split()))
+
+for i in range(len(x) - 1):
+    if x[i] + x[i + 1] == 5:
+        print(x[i], x[i + 1])
+
+
+numbers = [1, 2, 2, 3, 3, 3]
+
+frequency = {}
+
+for num in numbers:
+    frequency[num] = frequency.get(num, 0) + 1
+
+print(frequency)
+
+num = 7
+
+is_prime = True
+
+for i in range(2, num):
+    if num % i == 0:
+        is_prime = False
+        break
+
+if is_prime:
+    print("Prime")
+else:
+    print("Not Prime")
+num = 7
+
+is_prime = True
+
+for i in range(2, num):
+    if num % i == 0:
+        is_prime = False
+        break
+
+if is_prime:
+    print("Prime")
+else:
+    print("Not Prime")
+num = int(input("Enter a number: "))
+
+count = 0
+
+while num > 0:
+    num = num // 10
+    count += 1
+
+print("Number of digits =", count)
+num = int(input("Enter a number: "))
+
+reverse = 0
+
+while num > 0:
+    digit = num % 10
+    reverse = reverse * 10 + digit
+    num = num // 10
+
+print("Reverse =", reverse)
+num = int(input("Enter a number: "))
+
+total = 0
+
+while num > 0:
+    digit = num % 10
+    total += digit
+    num = num // 10
+
+print("Sum =", total)
+num = int(input("Enter a number: "))
+
+original = num
+reverse = 0
+
+while num > 0:
+    digit = num % 10
+    reverse = reverse * 10 + digit
+    num = num // 10
+
+if original == reverse:
+    print("Palindrome")
+else:
+    print("Not Palindrome")
+num = int(input("Enter a number: "))
+
+original = num
+total = 0
+
+while num > 0:
+    digit = num % 10
+    total += digit ** 3
+    num = num // 10
+
+if total == original:
+    print("Armstrong Number")
+else:
+    print("Not Armstrong Number")
+n = int(input("Enter number of terms: "))
+
+a = 0
+b = 1
+
+for i in range(n):
+    print(a, end=" ")
+
+    a, b = b, a + b
+for i in range(1, 6):
+
+    for j in range(i):
+        print("*", end=" ")
+
+    print()
+for i in range(1, 5):
+
+    for j in range(1, i + 1):
+        print(j, end=" ")
+
+    print()
+num = 1
+
+for i in range(3):
+
+    for j in range(3):
+        print(num, end=" ")
+        num += 1
+
+    print()
+numbers = [1, 2, 3, 4, 5]
+
+target = 5
+
+for i in range(len(numbers)):
+
+    for j in range(i + 1, len(numbers)):
+
+        if numbers[i] + numbers[j] == target:
+            print(numbers[i], numbers[j])
