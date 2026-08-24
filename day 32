@@ -1,0 +1,32 @@
+import pandas as  pd
+marks=pd.Series([85,90,75])
+print(marks)
+data={
+    'name':['john','smith','joe'],
+    'marks':[85,95,75]
+    }
+df=pd.DataFrame(data)
+print(df)
+data={
+    'name':['sai','siddu','sathwik'],
+    'subject':['maths','science','english'],
+    'marks':[85,91,78],
+    'passed':[True,False,True]
+}
+df=pd.DataFrame(data)
+print(df)
+print(df.shape)
+print(df.size)
+print(df.ndim)
+print(df.index)
+print(df.columns)
+print(df.axes)
+print(df.values)
+print(df.info)
+print(df.describe())
+print("\n")
+print(df.memory_usage())
+print(df['marks'])
+print(df[['name','marks']])
+
+
